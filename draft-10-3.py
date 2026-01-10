@@ -300,12 +300,19 @@ for _, row in df.iterrows():
         f"<td>{row['timestamp'].strftime('%H:%M') if pd.notna(row['timestamp']) else '-'}</td>"
         f"{cells}</tr>"
     )
-
+    
+render_nonce = pd.Timestamp.now().strftime("%Y%m%d%H%M%S")
+#html = f"""
+#<!doctype html>
+#<html>
+#<head>
+#<meta charset="utf-8">
 html = f"""
 <!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
+<!-- render_nonce: {render_nonce} -->
 
 <style>
 
@@ -399,6 +406,13 @@ setTimeout(function() {{
 """
 
 components.html(html, height=470, scrolling=True)
+#components.html(
+    #html,
+    #height=470,
+    #scrolling=True,
+    #key=f"table_{highlight_target}"
+#)
+st.caption(f"🎯 Highlight aktif: {highlight_target} | render {render_nonce}")
 
 # ============================================================
 # STATUS ALARM
