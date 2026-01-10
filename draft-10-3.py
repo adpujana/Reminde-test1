@@ -217,22 +217,41 @@ if not monitored_cols:
 #if not past_df.empty:
     #highlight_target = past_df.iloc[-1]["timestamp"]
     #alert_target = highlight_target
-now = pd.Timestamp.now().floor("min")
+#now = pd.Timestamp.now().floor("min")
 
-past_df = df[df["timestamp"] <= now]
-future_df = df[df["timestamp"] > now]
+#past_df = df[df["timestamp"] <= now]
+#future_df = df[df["timestamp"] > now]
+
+#highlight_target = None
+#alert_target = None
+
+#if not past_df.empty:
+    # normal case: data sudah lewat
+    #highlight_target = past_df.iloc[-1]["timestamp"]
+#elif not future_df.empty:
+    # fallback: data masih di masa depan
+    #highlight_target = future_df.iloc[0]["timestamp"]
+
+#alert_target = highlight_target   
+now = pd.Timestamp.now()
+
+# majukan waktu 5 detik (pre-emptive highlight)
+effective_time = now + pd.Timedelta(seconds=5)
+
+past_df = df[df["timestamp"] <= effective_time]
+future_df = df[df["timestamp"] > effective_time]
 
 highlight_target = None
 alert_target = None
 
 if not past_df.empty:
-    # normal case: data sudah lewat
+    # baris aktif (sudah atau hampir terjadi)
     highlight_target = past_df.iloc[-1]["timestamp"]
 elif not future_df.empty:
-    # fallback: data masih di masa depan
+    # fallback jika data masih di depan
     highlight_target = future_df.iloc[0]["timestamp"]
 
-alert_target = highlight_target   
+alert_target = highlight_target
 st.write(
     f"Sensitifitas: **{threshold} MW** — Monitoring **{len(monitored_cols)}/{len(unit_cols)} pembangkit**"
 )
