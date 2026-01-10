@@ -120,16 +120,29 @@ def load_data():
 #    df_raw["timestamp"] = (
 #        pd.to_datetime(df_raw[ts_col], errors="coerce").dt.tz_localize(None).dt.floor("s")
 #    )
+    #df_raw["timestamp"] = (
+        #pd.to_datetime(
+            #df_raw[ts_col],
+            #format="%m/%d/%Y %I:%M:%S %p",   # <-- AM/PM FIX
+            #errors="coerce"
+        #)
+        #.dt.tz_localize(None)
+        #.dt.floor("min")
+    #)
+    #df_raw = df_raw.dropna(subset=["timestamp"])
     df_raw["timestamp"] = (
-        pd.to_datetime(
-            df_raw[ts_col],
-            format="%m/%d/%Y %I:%M:%S %p",   # <-- AM/PM FIX
-            errors="coerce"
-        )
-        .dt.tz_localize(None)
-        .dt.floor("min")
+    pd.to_datetime(
+        df_raw[ts_col],
+        errors="coerce",
+        infer_datetime_format=True
     )
+    .dt.tz_localize(None)
+    .dt.floor("min")
+    )
+
+    # buang hanya baris timestamp invalid
     df_raw = df_raw.dropna(subset=["timestamp"])
+
     if ts_col.lower() != "timestamp":
         df_raw = df_raw.drop(columns=[ts_col], errors="ignore")
 
@@ -139,6 +152,18 @@ def load_data():
     return df.sort_values("timestamp"), unit_cols
 
 df, unit_cols = load_data()
+
+# ============================================================
+# DEBUG DATA CHECK (WAJIB SAAT DEPLOY)
+# ============================================================
+if df.empty:
+    st.error("❌ DATA KOSONG — semua timestamp gagal diparse")
+    st.stop()
+
+st.caption(
+    f"🕒 Data tersedia: {df['timestamp'].min()} s/d {df['timestamp'].max()} "
+    f"({len(df)} baris)"
+)
 
 # ============================================================
 # SIDEBAR SETTINGS
