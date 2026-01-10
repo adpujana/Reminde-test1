@@ -192,69 +192,35 @@ if not monitored_cols:
 # ============================================================
 # TIME TARGETS
 # ============================================================
-#now = datetime.now().replace(microsecond=0)
-#highlight_target = (now + timedelta(seconds=15)).replace(second=0)
-#alert_target = (now + timedelta(seconds=30)).replace(second=0)
-#now = pd.Timestamp.now().floor("min")
-
-#future_df = df[df["timestamp"] >= now]
-
-#highlight_target = None
-#alert_target = None
-
-#if not future_df.empty:
-    #highlight_target = future_df.iloc[0]["timestamp"]
-    #alert_target = highlight_target
-#highlight_target = df["timestamp"].max()
-#alert_target = highlight_target
-#now = pd.Timestamp.now().floor("min")
-
-#past_df = df[df["timestamp"] <= now]
-
-#highlight_target = None
-#alert_target = None
-
-#if not past_df.empty:
-    #highlight_target = past_df.iloc[-1]["timestamp"]
-    #alert_target = highlight_target
-#now = pd.Timestamp.now().floor("min")
-
-#past_df = df[df["timestamp"] <= now]
-#future_df = df[df["timestamp"] > now]
-
-#highlight_target = None
-#alert_target = None
-
-#if not past_df.empty:
-    # normal case: data sudah lewat
-    #highlight_target = past_df.iloc[-1]["timestamp"]
-#elif not future_df.empty:
-    # fallback: data masih di masa depan
-    #highlight_target = future_df.iloc[0]["timestamp"]
-
-#alert_target = highlight_target   
 now = pd.Timestamp.now()
 
-# majukan waktu 5 detik (pre-emptive highlight)
+# pre-highlight 5 detik
 effective_time = now + pd.Timedelta(seconds=5)
 
-past_df = df[df["timestamp"] <= effective_time]
-future_df = df[df["timestamp"] > effective_time]
+# target menit berdasarkan jam OS
+target_minute = effective_time.floor("min")
 
 highlight_target = None
 alert_target = None
 
-if not past_df.empty:
-    # baris aktif (sudah atau hampir terjadi)
-    highlight_target = past_df.iloc[-1]["timestamp"]
-elif not future_df.empty:
-    # fallback jika data masih di depan
-    highlight_target = future_df.iloc[0]["timestamp"]
+# CASE 1: timestamp PERSIS ADA → realtime
+if target_minute in df["timestamp"].values:
+    highlight_target = target_minute
+
+# CASE 2: waktu lebih kecil dari data pertama → tunggu
+elif target_minute < df["timestamp"].min():
+    highlight_target = df["timestamp"].min()
+
+# CASE 3: waktu lebih besar dari data terakhir → tahan di terakhir
+elif target_minute > df["timestamp"].max():
+    highlight_target = df["timestamp"].max()
 
 alert_target = highlight_target
 st.write(
     f"Sensitifitas: **{threshold} MW** — Monitoring **{len(monitored_cols)}/{len(unit_cols)} pembangkit**"
 )
+if highlight_target == df["timestamp"].max() and now > highlight_target + pd.Timedelta(minutes=1):
+    st.warning("⏳ Menunggu data terbaru...")
 
 # ============================================================
 # DETECTION LOGIC — NILAI AKTUAL
