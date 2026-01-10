@@ -192,26 +192,27 @@ if not monitored_cols:
 # ============================================================
 # TIME TARGETS
 # ============================================================
-now = pd.Timestamp.now()
+# SET timezone sesuai lokasi (PILIH SALAH SATU)
+# WIB  : Asia/Jakarta
+# WITA : Asia/Makassar
+# WIT  : Asia/Jayapura
+
+now = (
+    pd.Timestamp.now(tz="Asia/Makassar")   # ⬅️ SESUAIKAN
+    .tz_localize(None)                     # buang tz agar match CSV
+)
 
 # pre-highlight 5 detik
 effective_time = now + pd.Timedelta(seconds=5)
-
-# target menit berdasarkan jam OS
 target_minute = effective_time.floor("min")
 
 highlight_target = None
 alert_target = None
 
-# CASE 1: timestamp PERSIS ADA → realtime
 if target_minute in df["timestamp"].values:
     highlight_target = target_minute
-
-# CASE 2: waktu lebih kecil dari data pertama → tunggu
 elif target_minute < df["timestamp"].min():
     highlight_target = df["timestamp"].min()
-
-# CASE 3: waktu lebih besar dari data terakhir → tahan di terakhir
 elif target_minute > df["timestamp"].max():
     highlight_target = df["timestamp"].max()
 
