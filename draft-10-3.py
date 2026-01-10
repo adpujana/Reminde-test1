@@ -267,14 +267,27 @@ for _, row in df.iterrows():
     rid = ""
 
     #if row["timestamp"] == alert_target and st.session_state.pending_alarm and not st.session_state.acknowledged:
-    if alert_target is not None and row["timestamp"] == alert_target and st.session_state.pending_alarm and not st.session_state.acknowledged:
-        css = "blink"
-        rid = "alarm_row"
+    #if alert_target is not None and row["timestamp"] == alert_target and st.session_state.pending_alarm and not st.session_state.acknowledged:
+        #css = "blink"
+        #rid = "alarm_row"
 
     #elif row["timestamp"] == highlight_target:
-    elif highlight_target is not None and row["timestamp"] == highlight_target:
+    #elif highlight_target is not None and row["timestamp"] == highlight_target:
+        #css = "shift"
+        #rid = "shift_row"
+    # Highlight SELALU untuk baris aktif
+    if row["timestamp"] == highlight_target:
         css = "shift"
         rid = "shift_row"
+
+    # Jika alarm aktif, tambahkan efek blink
+    if (
+        row["timestamp"] == alert_target
+        and st.session_state.pending_alarm
+        and not st.session_state.acknowledged
+    ):
+        css = "blink"
+        rid = "alarm_row"
 
     cells = "".join([
         f"<td><b>{row[col]}</b></td>" if col in monitored_cols else f"<td>{row[col]}</td>"
