@@ -207,17 +207,32 @@ if not monitored_cols:
     #alert_target = highlight_target
 #highlight_target = df["timestamp"].max()
 #alert_target = highlight_target
+#now = pd.Timestamp.now().floor("min")
+
+#past_df = df[df["timestamp"] <= now]
+
+#highlight_target = None
+#alert_target = None
+
+#if not past_df.empty:
+    #highlight_target = past_df.iloc[-1]["timestamp"]
+    #alert_target = highlight_target
 now = pd.Timestamp.now().floor("min")
 
 past_df = df[df["timestamp"] <= now]
+future_df = df[df["timestamp"] > now]
 
 highlight_target = None
 alert_target = None
 
 if not past_df.empty:
+    # normal case: data sudah lewat
     highlight_target = past_df.iloc[-1]["timestamp"]
-    alert_target = highlight_target
-    
+elif not future_df.empty:
+    # fallback: data masih di masa depan
+    highlight_target = future_df.iloc[0]["timestamp"]
+
+alert_target = highlight_target   
 st.write(
     f"Sensitifitas: **{threshold} MW** — Monitoring **{len(monitored_cols)}/{len(unit_cols)} pembangkit**"
 )
