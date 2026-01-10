@@ -195,20 +195,23 @@ if not monitored_cols:
 #now = datetime.now().replace(microsecond=0)
 #highlight_target = (now + timedelta(seconds=15)).replace(second=0)
 #alert_target = (now + timedelta(seconds=30)).replace(second=0)
-now = pd.Timestamp.now().floor("min")
+#now = pd.Timestamp.now().floor("min")
 
-future_df = df[df["timestamp"] >= now]
+#future_df = df[df["timestamp"] >= now]
 
-highlight_target = None
-alert_target = None
+#highlight_target = None
+#alert_target = None
 
-if not future_df.empty:
-    highlight_target = future_df.iloc[0]["timestamp"]
-    alert_target = highlight_target
+#if not future_df.empty:
+    #highlight_target = future_df.iloc[0]["timestamp"]
+    #alert_target = highlight_target
+highlight_target = df["timestamp"].max()
+alert_target = highlight_target
 
 st.write(
     f"Sensitifitas: **{threshold} MW** — Monitoring **{len(monitored_cols)}/{len(unit_cols)} pembangkit**"
 )
+st.caption(f"⏱️ Highlight mengikuti data terakhir: {highlight_target}")
 
 # ============================================================
 # DETECTION LOGIC — NILAI AKTUAL
