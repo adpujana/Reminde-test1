@@ -117,19 +117,6 @@ def load_data():
     df_raw = pd.read_csv(url)
     ts_col = next((c for c in df_raw.columns if c.lower() in ["timestamp","waktu","jam","time"]), df_raw.columns[0])
 
-#    df_raw["timestamp"] = (
-#        pd.to_datetime(df_raw[ts_col], errors="coerce").dt.tz_localize(None).dt.floor("s")
-#    )
-    #df_raw["timestamp"] = (
-        #pd.to_datetime(
-            #df_raw[ts_col],
-            #format="%m/%d/%Y %I:%M:%S %p",   # <-- AM/PM FIX
-            #errors="coerce"
-        #)
-        #.dt.tz_localize(None)
-        #.dt.floor("min")
-    #)
-    #df_raw = df_raw.dropna(subset=["timestamp"])
     df_raw["timestamp"] = (
     pd.to_datetime(
         df_raw[ts_col],
@@ -226,7 +213,7 @@ if highlight_target == df["timestamp"].max() and now > highlight_target + pd.Tim
 # ============================================================
 # DETECTION LOGIC — NILAI AKTUAL
 # ============================================================
-#future_row = df[df["timestamp"] == alert_target]
+
 future_row = df[df["timestamp"] == alert_target] if alert_target is not None else pd.DataFrame()
 alerts = []
 
@@ -267,15 +254,6 @@ for _, row in df.iterrows():
     css = ""
     rid = ""
 
-    #if row["timestamp"] == alert_target and st.session_state.pending_alarm and not st.session_state.acknowledged:
-    #if alert_target is not None and row["timestamp"] == alert_target and st.session_state.pending_alarm and not st.session_state.acknowledged:
-        #css = "blink"
-        #rid = "alarm_row"
-
-    #elif row["timestamp"] == highlight_target:
-    #elif highlight_target is not None and row["timestamp"] == highlight_target:
-        #css = "shift"
-        #rid = "shift_row"
     # Highlight SELALU untuk baris aktif
     if row["timestamp"] == highlight_target:
         css = "shift"
@@ -303,11 +281,6 @@ for _, row in df.iterrows():
     )
     
 render_nonce = pd.Timestamp.now().strftime("%Y%m%d%H%M%S")
-#html = f"""
-#<!doctype html>
-#<html>
-#<head>
-#<meta charset="utf-8">
 html = f"""
 <!doctype html>
 <html>
@@ -407,12 +380,7 @@ setTimeout(function() {{
 """
 
 components.html(html, height=470, scrolling=True)
-#components.html(
-    #html,
-    #height=470,
-    #scrolling=True,
-    #key=f"table_{highlight_target}"
-#)
+
 st.caption(f"🎯 Highlight aktif: {highlight_target} | render {render_nonce}")
 
 # ============================================================
