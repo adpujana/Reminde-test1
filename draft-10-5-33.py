@@ -149,7 +149,7 @@ else:
 # ============================================================
 # LOAD CSV
 # ============================================================
-url = "https://drive.google.com/uc?export=download&id=1ycCOIWaw0JPdPsuvxrA-cLhhJJaNYEz4"
+url = "https://drive.google.com/uc?export=download&id=15L1P35fbwH9H27RWCCh7WX2F5A45VgZb"
 
 @st.cache_data(ttl=10)
 def load_data():
