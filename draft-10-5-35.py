@@ -139,23 +139,28 @@ else:
 # ============================================================
 # LOAD CSV
 # ============================================================
-url = "https://drive.google.com/uc?export=download&id=15L1P35fbwH9H27RWCCh7WX2F5A45VgZb"
+url = "https://drive.google.com/uc?export=download&id=1V8ZRZGwj__bBl8bFP8AqwKZvQCPaG5af"
+
+# ============================================================
+# LOAD CSV
+# ============================================================
 
 @st.cache_data(ttl=10)
 def load_data():
-    df_raw = pd.read_csv(url)
-    ts_col = next((c for c in df_raw.columns if c.lower() in ["TIMESTAMP","WAKTU","JAM","TIME"]), df_raw.columns[0])
+
+    df_raw = pd.read_excel(url, engine="openpyxl")
+
+    ts_col = next(
+        (c for c in df_raw.columns if c.lower() in ["timestamp","waktu","jam","time"]),
+        df_raw.columns[0]
+    )
 
     df_raw["timestamp"] = (
-    pd.to_datetime(
-        df_raw[ts_col],
-        errors="coerce",
-    )
-    .dt.tz_localize(None)
-    .dt.floor("min")
+        pd.to_datetime(df_raw[ts_col], errors="coerce")
+        .dt.tz_localize(None)
+        .dt.floor("min")
     )
 
-    # buang hanya baris timestamp invalid
     df_raw = df_raw.dropna(subset=["timestamp"])
 
     if ts_col.lower() != "timestamp":
@@ -166,7 +171,14 @@ def load_data():
 
     return df.sort_values("timestamp"), unit_cols
 
+
+# WAJIB langsung panggil setelah fungsi selesai
 df, unit_cols = load_data()
+
+
+# ============================================================
+# DETECT JENIS
+# ============================================================
 
 def detect_jenis(unit_name: str):
     for t in ["PLTA", "PLTM", "PLTP", "PLTD", "PLTU", "PLTS", "PLTG"]:
@@ -174,12 +186,15 @@ def detect_jenis(unit_name: str):
             return t
     return "LAINNYA"
 
-# mapping jenis -> list unit
+
+# ============================================================
+# MAPPING JENIS
+# ============================================================
+
 jenis_map = {}
 for u in unit_cols:
     j = detect_jenis(u)
     jenis_map.setdefault(j, []).append(u)
-
 
 # ============================================================
 # DEBUG DATA CHECK (WAJIB SAAT DEPLOY)
@@ -199,7 +214,7 @@ st.caption(
 
 st.sidebar.header("Pengaturan Monitoring")
 
-threshold = st.sidebar.slider("Delta P (MW)", 0.1, 20.0, 2.0, 0.1)
+threshold = st.sidebar.slider("Delta P (MW)", 0.1, 20.0, 0.5, 0.1)
 
 #if "saved_monitored_cols" not in st.session_state:
  #   st.session_state.saved_monitored_cols = unit_cols
